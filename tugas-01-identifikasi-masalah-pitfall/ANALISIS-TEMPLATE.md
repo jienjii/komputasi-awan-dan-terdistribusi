@@ -26,7 +26,7 @@
 
 ---
 
-## Pitfall 2: [nama pitfall] — ditulis oleh [sefia nuraini]
+## Pitfall 2: [Bandwidth Tidak Terbatas] — ditulis oleh [sefia nuraini]
 
 **Bukti di skenario:** Waktu bikin fitur tracking order real-time, tim front-end nulis kode yang manggil API status pesanan tiap request langsung dianggap "instant", jadi mereka pasang polling tiap 1 detik ke service tracking tanpa mikirin delay jaringan. Di local testing semua kelihatan lancar-lancar aja karena latency-nya emang deket ke nol.
 
@@ -40,7 +40,7 @@ Kalau tetap butuh polling, naikkan interval nya dan bikin adaptif (misal makin l
 Tambahin caching di sisi client/edge buat status yang nggak berubah-ubah cepat
 
 Trade-off: Push-based butuh effort lebih buat maintain koneksi persisten (WebSocket) dan lebih ribet pas scaling horizontal dibanding REST biasa. Kalau adaptif polling yang dipilih, ada resiko user ngerasa update-nya "telat" karena interval yang makin melebar.
-## Pitfall 3: [nama pitfall] — ditulis oleh [sefia nuraini/]
+## Pitfall 3: [Jaringan Aman / The Network is Secure] — ditulis oleh [sefia nuraini/]
 
 **Bukti di skenario:** Komunikasi antar-modul di FoodGo (pesanan, pembayaran, notifikasi) dilakukan lewat HTTP biasa tanpa enkripsi, dan tidak ada mekanisme autentikasi/otorisasi antar-service—modul pembayaran menerima begitu saja request yang "mengaku" datang dari modul pesanan tanpa validasi lebih lanjut.
 
