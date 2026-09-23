@@ -1,11 +1,11 @@
 # Tugas 1 — Analisis Pitfall FoodGo
 
-**Kelompok:** [nama kelompok]
+**Kelompok:** Kelompok 14
 
 | Nama | NIM | Kontribusi |
 |---|---|---|
-| [nama 1] | [nim] | [pitfall/bagian yang dikerjakan] |
-| [nama 2] | [nim] | [pitfall/bagian yang dikerjakan] |
+| Angeli Thie | 103072400032 | [pitfall/bagian yang dikerjakan] |
+| Sefia Nuraini | 103072400043 | [pitfall/bagian yang dikerjakan] |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
 ## Pitfall 1: [nama pitfall] — ditulis oleh [nama]
