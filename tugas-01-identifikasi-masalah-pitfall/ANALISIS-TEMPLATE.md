@@ -4,8 +4,8 @@
 
 | Nama | NIM | Kontribusi |
 |---|---|---|
-| [Angeli Thie] | [103072400032] | [Analisis Pitfall 1 (The Network is Reliable)] |
-| [Sefia Nuraini] | [103072400043] | [pitfall/bagian yang dikerjakan] |
+| [Angeli Thie] | [103072400032] | [Analisis Pitfall 1 & Pitfall 3 (solusi, trade off), Kesimpulan] |
+| [Sefia Nuraini] | [103072400043] | [Analisis Pitfall 2 & Pitfall 3 (bukti, kenapa, dampak)] |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
 ## Pitfall 1: [The Network is Reliable] — ditulis oleh [Angeli Thie]
@@ -26,21 +26,24 @@
 
 ---
 
-## Pitfall 2: [Bandwidth Tidak Terbatas] — ditulis oleh [sefia nuraini]
+## Pitfall 2: [Bandwidth Tidak Terbatas] — ditulis oleh [Sefia Nuraini]
 
 **Bukti di skenario:** Waktu bikin fitur tracking order real-time, tim front-end nulis kode yang manggil API status pesanan tiap request langsung dianggap "instant", jadi mereka pasang polling tiap 1 detik ke service tracking tanpa mikirin delay jaringan. Di local testing semua kelihatan lancar-lancar aja karena latency-nya emang deket ke nol.
 
 **Kenapa ini keliru:** Latency itu nggak pernah benar-benar nol, apalagi kalau requestnya lintas server, lintas region, atau lewat internet publik (misal user pakai jaringan seluler). Yang keliatan cepat pas testing di localhost bisa jadi jauh lebih lambat begitu dipakai di kondisi nyata, apalagi kalau ada banyak hop antar service (order -> tracking -> notifikasi -> dsb).
 
-Dampak ke FoodGo: Polling tiap 1 detik dari ribuan user yang lagi nunggu makanannya bikin beban ke service tracking numpuk parah, padahal responnya sendiri belum tentu balik secepat itu. Ujung-ujungnya request numpuk di antrian, delay makin kerasa, dan user malah lihat status pesanan "nyangkut" atau telat update padahal driver udah jalan.
+**Dampak ke FoodGo:** Polling tiap 1 detik dari ribuan user yang lagi nunggu makanannya bikin beban ke service tracking numpuk parah, padahal responnya sendiri belum tentu balik secepat itu. Ujung-ujungnya request numpuk di antrian, delay makin kerasa, dan user malah lihat status pesanan "nyangkut" atau telat update padahal driver udah jalan.
 
 **Solusi desain awal:**
 Ganti pendekatan polling jadi push-based (pakai WebSocket atau server-sent events) supaya update status dikirim cuma pas ada perubahan, bukan ditanya terus-terusan
 Kalau tetap butuh polling, naikkan interval nya dan bikin adaptif (misal makin lama makin jarang kalau nggak ada perubahan status)
 Tambahin caching di sisi client/edge buat status yang nggak berubah-ubah cepat
 
-Trade-off: Push-based butuh effort lebih buat maintain koneksi persisten (WebSocket) dan lebih ribet pas scaling horizontal dibanding REST biasa. Kalau adaptif polling yang dipilih, ada resiko user ngerasa update-nya "telat" karena interval yang makin melebar.
-## Pitfall 3: [Jaringan Aman / The Network is Secure] — ditulis oleh [sefia nuraini/]
+**Trade-off**: Push-based butuh effort lebih buat maintain koneksi persisten (WebSocket) dan lebih ribet pas scaling horizontal dibanding REST biasa. Kalau adaptif polling yang dipilih, ada resiko user ngerasa update-nya "telat" karena interval yang makin melebar.
+
+---
+
+## Pitfall 3: [Jaringan Aman] — ditulis oleh [Sefia Nuraini]
 
 **Bukti di skenario:** Komunikasi antar-modul di FoodGo (pesanan, pembayaran, notifikasi) dilakukan lewat HTTP biasa tanpa enkripsi, dan tidak ada mekanisme autentikasi/otorisasi antar-service—modul pembayaran menerima begitu saja request yang "mengaku" datang dari modul pesanan tanpa validasi lebih lanjut.
 
@@ -48,8 +51,16 @@ Trade-off: Push-based butuh effort lebih buat maintain koneksi persisten (WebSoc
 
 **Dampak ke FoodGo:** Data sensitif seperti informasi pembayaran, nomor kartu, atau data pribadi user bisa disadap (man-in-the-middle) kalau ada pihak tidak sah yang berhasil masuk ke jaringan internal. Selain itu, tanpa autentikasi antar-service, ada risiko pihak eksternal mengirim request palsu langsung ke modul pembayaran untuk membuat transaksi ilegal atau memanipulasi status pesanan tanpa melalui modul pesanan yang sah.
 
+**Solusi desain awal:** Menerapkan enkripsi pada seluruh jalur komunikasi antar-layanan menggunakan mTLS (Mutual TLS) atau HTTPS untuk menjamin enkripsi data secara end-to-end. Selain itu, setiap layanan seperti modul pembayaran wajib memvalidasi identitas pengirim request menggunakan autentikasi token (seperti JWT atau API Key) sebelum memproses transaksi, serta membatasi akses antar-modul melalui konfigurasi Firewall internal atau Network Security Groups berbasis prinsip Zero Trust
+
+**Trade-off:** Solusi ini meningkatkan kompleksitas operasional dan beban komputasi (CPU overhead) akibat enkripsi serta pemrosesan TLS handshake pada setiap request antar-service. Selain itu, manajemen sertifikat dan token membutuhkan otomatisasi yang tepercaya, karena kesalahan konfigurasi atau sertifikat yang kedaluwarsa dapat menyebabkan komunikasi antar-layanan terputus total secara mendadak
+
 ---
 
 ## Kesimpulan Kelompok
+Untuk memperbaiki ketiga pitfall utama di atas (*unreliable network*, asumsi *zero latency/infinite bandwidth*, dan *unsecure network*), FoodGo disarankan untuk beralih dari arsitektur monolitik yang saling *blocking* menuju arsitektur terdistribusi yang berbasis *resilient design* dan *event-driven*
 
-[Ringkasan: jika FoodGo memperbaiki ketiga pitfall ini, apa arsitektur yang disarankan secara garis besar? Kaitkan dengan Tugas 2.]
+Secara garis besar, arsitektur yang disarankan meliputi:
+1. Menerapkan *timeout*, *circuit breaker*, serta komunikasi *push-based/asynchronous* (misal: WebSocket / Message Broker) untuk mencegah kemacetan *resource* server saat trafik memuncak
+2. Mengamankan seluruh komunikasi antar-layanan menggunakan enkripsi (mTLS/HTTPS) serta mekanisme otentikasi token (misal: JWT / API key) untuk memastikan *zero-trust network*
+3. Perubahan ini menjadi dasar yang kuat untuk melangkah ke Tugas 2, yaitu perancangan arsitektur microservices/terdistribusi yang dapat di-*scale* secara individual dan tahan terhadap kegagalan parsial (*fault-tolerant*)
