@@ -28,25 +28,12 @@ graph TD
     Gateway -->|2. Route Request - Sinkron| OrderSvc[📦 Modul Pesanan / Order Service]
     
     %% Inter-service Communication (Synchronous Request-Response)
-    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[🍽️ Modul Katalog Resto]
-    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaySvc[💳 Modul Pembayaran]
-    
-    %% Inter-service Communication (Asynchronous Notification / Event Trigger)
-    OrderSvc -->|5. Trigger Dispatch & Push Notif - Async HTTP/gRPC| CourierSvc[🛵 Modul Kurir & Notifikasi]
+  OrderSvc -->|3. Sinkron: validasi menu & harga, timeout 3 dtk| RestoSvc[🍳 Modul Katalog Resto]
+OrderSvc -->|4. Sinkron: otorisasi bayar, timeout + circuit breaker| PaymentSvc[💳 Modul Pembayaran]
 
-    %% External Apps / Endpoints
-    RestoSvc -->|6. Kirim Pesanan Masuk| RestoApp[🏪 App Resto]
-    CourierSvc -->|7. Penugasan & Push Notification| CourierApp[📱 App Kurir]
-
-    %% Styling
-    classDef sync fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef async fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    classDef gateway fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    class Gateway gateway;
-    class OrderSvc,PaySvc,RestoSvc sync;
-    class CourierSvc async;
-```
+OrderSvc -.->|5. Asinkron: publish PesananDibayar| Broker[(📥 Message Broker)]
+Broker -.->|6. Asinkron: subscribe PesananDibayar| RestoSvc
+RestoSvc -.->|7. Asinkron: push notifikasi pesanan masuk| AppResto[🏪 App Resto]
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
