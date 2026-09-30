@@ -5,26 +5,22 @@
 | Nama | NIM | Kontribusi |
 |---|---|---|
 | [Angeli Thie] | [103072400032] | [] |
-| [Sefia Nuraini] | [103072400043] | [] |
+| [Sefia Nuraini] | [103072400043] | ustifikasi Pemilihan Gaya Arsitektur[] |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
 ## Pitfall 1: [The Network is Reliable] — ditulis oleh [Angeli Thie]
 
-**Bukti di skenario:** [Tim menemukan bahwa kode mereka menulis asumsi seperti "# network is always reliable, no need for retry" dan tidak ada timeout sama sekali pada pemanggilan antar service (modul pesanan memanggil modul pembayaran dan menunggu tanpa batas waktu)]
+SOA (REST Synchronous) untuk Layanan Inti Real-Time:
 
-**Kenapa ini keliru:** [Jaringan dalam sistem terdistribusi pada kenyataannya bersifat unreliable (tidak dapat diandalkan 100%). Koneksi dapat terputus, mengalami packet loss, high latency, atau layanan tujuan mengalami masalah sementara. Berasumsi bahwa panggilan jaringan selalu berhasil dan pasti merespons secara instan membuat aplikasi rentan mengalami hang atau deadlock]
+Kebutuhan Transaksi Instant: Proses pembuatan pesanan, validasi ketersediaan menu resto, dan eksekusi pembayaran membutuhkan kepastian langsung saat itu juga (synchronous request-response). Pelanggan perlu mengetahui secara langsung apakah transaksi pembayaran berhasil dan pesanan resmi dibuat.
 
-**Dampak ke FoodGo:** [Saat modul pembayaran mengalami gangguan atau keterlambatan merespons, modul pesanan akan blocking (menunggu tanpa batas waktu/tanpa timeout). Hal ini menyebabkan pemakaian thread/connection pool terus menumpuk di modul pesanan hingga akhirnya server kehabisan resource dan crash]
+Pengisolasian Layanan: Dengan memecah monolitis menjadi layanan terpisah (Service Pesanan, Service Katalog Resto, Service Pembayaran), setiap layanan memiliki batas tanggung jawab (boundary) yang jelas dan dapat dipanggil menggunakan API HTTP/REST melalui API Gateway.
 
-**Solusi desain awal:** [
-    1. Menerapkan Timeout pada setiap panggilan jaringan antar-layanan (misalnya batas maksimal 3-5 detik)
-    2. Menerapkan strategi Retry with Exponential Backoff and Jitter untuk menangani kegagalan sementara (transient failure)
-    3. Mengintegrasikan pola Circuit Breaker untuk memutus panggilan ke layanan pembayaran secara otomatis jika tingkat kegagalannya melampaui ambang batas tertentu
-]
+Publish-Subscribe (Asynchronous Event-Driven) untuk Koordinasi & Notifikasi:
 
-**Trade-off:** [Penerapan retry dapat memperparah beban pada layanan target yg sedang overloaded (cascading failure atau retry storm). Penggunaan Circuit Breaker juga berisiko menolak transaksi pengguna secara instan jika parameter threshold kurang tepat]
+Mengatasi Tight Coupling (Sesuai Studi Kasus): Setelah pembayaran selesai, koordinasi ke Service Resto dan Service Kurir diproses secara asinkron lewat Message Broker (seperti RabbitMQ atau Apache Kafka).
 
----
+Independensi Deployment & Downtime Zero: Jika tim Kurir atau tim Resto melakukan pembaruan kode (deploy ulang) atau layanannya mengalami masalah sementara, modul transaksi utama (Pesanan & Pembayaran) tidak ikut mati/down. Pesan event akan ditampung di dalam antrean (queue) dan akan diproses begitu layanan Kurir/Resto kembali aktif.
 
 ## Pitfall 2: [Bandwidth Tidak Terbatas] — ditulis oleh [Sefia Nuraini]
 
