@@ -21,18 +21,33 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
-```mermaid
-flowchart LR
-    A[Pelanggan] -->|HTTP Request| B[API Gateway]
-    B -->|Request Pesanan| C[Service Pesanan]
-    B -->|Request Katalog| F[Service Katalog Resto]
-    C -->|Request Pembayaran| D[Service Pembayaran]
-    D -->|Status Pembayaran| C
-    C -->|Request Penugasan Kurir| E[Service Kurir dan Notifikasi]
-    E -->|Status Kurir| C
-    F -->|Data Restoran dan Menu| B
+graph TB
+    %% Client & Gateway
+    Client[📱 Pelanggan / App Mobile] -->|1. HTTP / REST API| Gateway[🌐 API Gateway]
 
-**Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
+    %% Synchronous Services (SOA/Microservices)
+    subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
+        Gateway -->|2. Route Request| OrderSvc["📦 Service Pesanan"]
+        OrderSvc -->|3. Validasi Menu & Harga (HTTP/gRPC)| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|4. Proses Bayar (HTTP/gRPC)| PaymentSvc["💳 Service Pembayaran"]
+    end
+
+    %% Event Broker
+    Broker[("📩 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
+
+    %% Asynchronous Processing (Pub-Sub)
+    OrderSvc -.->|5. Publish Event: OrderPaid| Broker
+
+    subgraph Event_Subscribers ["Layanan Pendukung (Pub-Sub - Asinkron)"]
+        Broker -.->|6a. Subscribe Event| RestoNotifSvc["👨‍🍳 Service Modul Resto"]
+        Broker -.->|6b. Subscribe Event| CourierSvc["🛵 Service Kurir & Notifikasi"]
+    end
+
+    %% Database Isolation
+    OrderSvc --- DB_Order[(Database Pesanan)]
+    PaymentSvc --- DB_Pay[(Database Pembayaran)]
+    RestoSvc --- DB_Resto[(Database Katalog)]
+    CourierSvc --- DB_Courier[(Database Kurir)]
 
 ## Struktur Submission
 
