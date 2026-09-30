@@ -21,12 +21,13 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
+```mermaid
 graph TD
     %% Client & Gateway
     Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
     %% Core SOA Services
-    subgraph Core_SOA ["Layanan Inti (SOA - Sinkron)"]
+    subgraph Core_SOA ["Layanan Inti (SOA)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
         OrderSvc -->|"Sinkron: validasi menu (timeout 3s, CB)"| RestoSvc["🍔 Service Katalog Resto"]
         OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
@@ -41,7 +42,7 @@ graph TD
     Broker[("📥 Message Broker\n(RabbitMQ / Kafka)")]
 
     %% Service Async / Support
-    subgraph Async_Services ["Layanan Pendukung (Pub-Sub - Asinkron)"]
+    subgraph Async_Services ["Layanan Pendukung (Pub-Sub)"]
         CourierSvc["🛵 Service Kurir & Notifikasi"]
     end
     CourierSvc --- DB_Courier[("Database Kurir")]
@@ -59,6 +60,8 @@ graph TD
 
     %% Real-time Tracking
     OrderSvc -.->|push SSE status| Client
+```
+
   
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
