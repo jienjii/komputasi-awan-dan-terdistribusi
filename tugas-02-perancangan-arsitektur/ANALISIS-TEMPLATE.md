@@ -62,8 +62,16 @@ Tambahin caching di sisi client/edge buat status yang nggak berubah-ubah cepat
     * Jika rasio kegagalan mencapai >50% dalam rentang 10 detik, status *circuit breaker* berubah menjadi **Open**. Panggilan berikutnya akan langsung ditolak secara lokal (*fast-fail*) tanpa membebankan *Payment Service*, serta mengembalikan pesan bahwa metode pembayaran sedang tidak stabil. Setelah rentang *cooldown* tertentu, status masuk ke **Half-open** untuk menguji pemulihan layanan secara parsial
 ## Bagian 4: [Keamanan Inter-Service & Zero Trust] - ditulis oleh [Angeli Thie]
 
-### 1. Enkripsi Transport
-* Menggunakan HTTPS untuk komunikasi antar service
+### 1. Enkripsi Transport (mTLS & HTTPS)
+* **Enkripsi Transit:** Semua komunikasi jaringan antar-layanan di dalam jaringan internal Wajib menggunakan enkripsi **HTTPS/mTLS (Mutual TLS)**
+* **Mutual Authentication:** Baik layanan pemanggil (*Order Service*) maupun layanan penerima (*Payment Sevice*) saling memverifikasi sertifikat digital masing-masing. Hal ini memastikan bahwa data di dalam jaringan tidak dapat disadap (*anti-eavesdrooping/Man-in-the-Middle*) dan mencegah *service* tak dikenal untuk masuk ke antrean komunikasi
+
+### 2. Autentifikasi & Otorisasi Antar-Layanan (Zero Trust)
+* **Token Authentication:** Setiap permintaan antar-layanan wajib menyertakan **Service JWT (JSON Web Token)** atau *API Key / Identify Token* bertanda tangan digital di dalam *Header HTTP*
+* **Otorisasi Berbasis Peran (RBAC):** *Payment Service* tidak lagi menerima semua *request* secara mentah. Layanan tersebut memversifikasi klaim token untuk memastikan bahwa panggilan benar-benar berasal dari *Order Service* yang sah dan memiliki hak akses untuk mengeksekusi instruksi pembayaran
+
+### 3. Isolasi Jaringan (Network Segmentation)
+* Menerapkan aturan **Firewall / Network Security Groups (NSG)** internal. *Payment Service* dan basis data tidak boleh diakses langsung dari luar/internet publik, melainkan hanya menerima lalu lintas dari IP/Port terdaftar milik *API Gateway* dan *Order Service*
 
 ---
 
