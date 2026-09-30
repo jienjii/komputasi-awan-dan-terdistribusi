@@ -21,12 +21,13 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
+```mermaid
 graph TD
     %% Client & Gateway
     Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
     %% Core SOA Services
-    subgraph Core_SOA ["Layanan Inti (SOA - Sinkron)"]
+    subgraph Core_SOA ["Layanan Inti (SOA)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
         OrderSvc -->|"Sinkron: validasi menu (timeout 3s, CB)"| RestoSvc["🍔 Service Katalog Resto"]
         OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
