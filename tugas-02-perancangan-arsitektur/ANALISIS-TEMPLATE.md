@@ -8,7 +8,7 @@
 | [Sefia Nuraini] | [103072400043] | ustifikasi Pemilihan Gaya Arsitektur[] |
 | [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
 
-## Pitfall 1: [The Network is Reliable] — ditulis oleh [Angeli Thie]
+## Pitfall 1: [SOA (REST Synchronous)] — ditulis oleh [sefia nuraini ]
 
 SOA (REST Synchronous) untuk Layanan Inti Real-Time:
 
