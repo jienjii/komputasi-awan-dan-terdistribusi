@@ -21,9 +21,10 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
+```mermaid
 graph TB
     %% Client & Gateway
-    Client["📱 Pelanggan (App Mobile)"] -->|Sinkron: HTTP/REST| Gateway["🌐 API Gateway"]
+    Client["📱 Pelanggan / Aplikasi Seluler"] -->|Sinkron: HTTP / REST API| Gateway["🌐 API Gateway"]
 
     %% Core Services (SOA)
     subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
@@ -33,7 +34,7 @@ graph TB
     end
 
     %% Event Broker
-    Broker[("📩 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
+    Broker[("📥 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
 
     %% Asynchronous Processing (Pub-Sub)
     OrderSvc -.->|Asinkron: publish PesananDibayar| Broker
@@ -56,6 +57,7 @@ graph TB
     PaymentSvc --- DB_Pay[("Database Pembayaran")]
     RestoSvc --- DB_Resto[("Database Katalog")]
     CourierSvc --- DB_Courier[("Database Kurir")]
+```
 
 ## Struktur Submission
 
