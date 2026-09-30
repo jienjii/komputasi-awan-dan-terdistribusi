@@ -46,13 +46,20 @@ Tambahin caching di sisi client/edge buat status yang nggak berubah-ubah cepat
 ## Bagian 3: [High Availability & Fault Tolerance] — ditulis oleh [Angeli Thie]
 
 ### 1. Perancangan Load Balancer & Horizontal Scaling 
-* **Load Balancer:** Menggunakan Load Balancer di depan Order Service dan Payment Service
-* **Auto Scaling:** Menerapkan Auto-scaling berbasis pemakaian CPU server
+* **Pendekatan:** Menerapkan *Layer 7 Load Balancer* (misalnya NGINX / HAProxy) di depan *Order Service* dan *Payment Service*
+* **Mekanisme Scaling:** Setiap *microservice* disiapkan untuk berjalan minimal dalam 2 instance (*redundancy*) untuk menghilangkan *Single Point of Failure* (SPOF). *Load Balancer* mendistribusikan lalu lintas menggunakan algoritma *Round Robin* atau *Leasy Connections*
+* **Health Checking:** *Load Balancer* melakukan *active health check* berkala ke *endpoint* `/health` tiap *service*. Jika satu instance gagal/down, lalu lintas secara otomatis dialihkan ke instance yang sehat (*auto-failover*)
 
-### 2. Pattern Fault Tolerance
-* **Timeout:** Menambahkan timeout 3 detik untuk panggilan antar service
-* **Retry:** Menerapkan retry otomatis saat terjadi error jaringan
-
+### 2. Pattern Fault Tolerance (Timeout, Retry, & Circuit Breaker)
+* **Timeout:** 
+    * Semua panggilan *synchronous* antar-layanan (misal: *Order Service* ke *Payment Service*) dibatasi *timeout* maksimal **3 detik**
+    * Jika tidak ada respons dalam 3 detik, *Order Service* membatalkan panggilan tersebut dan mengembalikan *fallback response* ke pengguna daripada menunggu tanpa batas (*hang*)
+* **Exponential Backoff Retry with Jitter:**
+    * Untuk mengatasi kegagalan sementara (*transient failure*), diterapkan *retry* maksimal **3 kali**
+    * Waktu jeda antar *retry* meningkat secara eksponensial (misal: 1 detik, 2 detik, 4 detik) ditambah variasi acak (*jitter*) untuk mencegah kondisi *retry storm* (penumpukan *request* simultan yang memperparah beban server tujuan)
+* **Circuit Breaker Point:**
+    * Menerapkan *Circuit Breaker* (misal menggunakan Resillence4j/Envoy) pada komunikasi ke *Payment Service*
+    * Jika rasio kegagalan mencapai >50% dalam rentang 10 detik, status *circuit breaker* berubah menjadi **Open**. Panggilan berikutnya akan langsung ditolak secara lokal (*fast-fail*) tanpa membebankan *Payment Service*, serta mengembalikan pesan bahwa metode pembayaran sedang tidak stabil. Setelah rentang *cooldown* tertentu, status masuk ke **Half-open** untuk menguji pemulihan layanan secara parsial
 ## Bagian 4: [Keamanan Inter-Service & Zero Trust] - ditulis oleh [Angeli Thie]
 
 ### 1. Enkripsi Transport
