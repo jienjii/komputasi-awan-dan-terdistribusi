@@ -18,32 +18,32 @@ Melanjutkan Tugas 1: FoodGo butuh sistem yang **decoupled** agar tim kurir dan t
 Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
-graph TD
-    %% Client & Gateway Entry
-    Client[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| Gateway[🚪 API Gateway]
 
-    %% Core Services via API Gateway
-    Gateway -->|2. Route Request - Sinkron| OrderSvc[📦 Modul Pesanan / Order Service]
-    
-    %% Inter-service Communication (Synchronous Request-Response)
-    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[🍽️ Modul Katalog Resto]
-    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaySvc[💳 Modul Pembayaran]
-    
-    %% Inter-service Communication (Asynchronous Notification / Event Trigger)
-    OrderSvc -->|5. Trigger Dispatch & Push Notif - Async HTTP/gRPC| CourierSvc[🛵 Modul Kurir & Notifikasi]
+```mermaid
+graph LR
 
-    %% External Apps / Endpoints
-    RestoSvc -->|6. Kirim Pesanan Masuk| RestoApp[🏪 App Resto]
-    CourierSvc -->|7. Penugasan & Push Notification| CourierApp[📱 App Kurir]
+    Client[Pelanggan]
+    APIGW[API Gateway]
 
-    %% Styling
-    classDef sync fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef async fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    classDef gateway fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    OrderSvc[Modul Pesanan]
+    PaymentSvc[Modul Pembayaran]
+    RestoSvc[Modul Katalog Resto]
+    NotifSvc[Modul Kurir dan Notifikasi]
 
-    class Gateway gateway;
-    class OrderSvc,PaySvc,RestoSvc sync;
-    class CourierSvc async;
+    Broker[(Message Broker)]
+
+    Client -->|HTTP Request| APIGW
+    APIGW -->|Buat Pesanan| OrderSvc
+
+    OrderSvc -->|Request Pembayaran (Sinkron)| PaymentSvc
+
+    OrderSvc -->|Publish OrderCreated| Broker
+    PaymentSvc -->|Publish PaymentSuccess| Broker
+
+    Broker -->|Subscribe Event| RestoSvc
+    Broker -->|Subscribe Event| NotifSvc
+```
+
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
