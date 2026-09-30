@@ -18,22 +18,21 @@ Melanjutkan Tugas 1: FoodGo butuh sistem yang **decoupled** agar tim kurir dan t
 Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
-
 graph TD
-    Pelanggan[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| APIGateway[🌐 API Gateway]
-    APIGateway -->|2. Route Request - Sinkron| OrderSvc[📦 Modul Pesanan / Order Service]
+    Pelanggan[Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| APIGateway[API Gateway]
+    APIGateway -->|2. Permintaan Rute - Sinkron| OrderSvc[Modul Pesanan / Layanan Pemesanan]
 
     %% Jalur Validasi & Bayar (Sinkron - SOA)
-    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[📖 Modul Katalog Resto]
-    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaymentSvc[💳 Modul Pembayaran]
+    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[Modul Katalog Resto]
+    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaymentSvc[Modul Pembayaran]
 
-    %% Jalur Notifikasi & Kurir (Asinkron - Pub/Sub) -> Solusi agar tidak saling mengganggu
-    OrderSvc -->|5. Publish Event: OrderPaid - Asinkron| Broker[(📥 Message Broker)]
+    %% Jalur Notifikasi & Kurir (Asinkron - Pub/Sub)
+    OrderSvc -->|5. Publish Event: OrderPaid - Asinkron| Broker[(Message Broker)]
     
     %% Distribusi Event dari Broker ke Subscriber
-    Broker -->|6. Kirim Pesanan Masuk| AppResto[🏪 App Resto]
-    Broker -->|7. Trigger Dispatch & Push Notif| CourierSvc[🔔 Modul Kurir & Notifikasi]
-    CourierSvc -->|8. Penugasan & Push Notification| AppKurir[🛵 App Kurir]
+    Broker -->|6. Kirim Pesanan Masuk| AppResto[App Resto]
+    Broker -->|7. Trigger Dispatch & Push Notif| CourierSvc[Modul Kurir & Notifikasi]
+    CourierSvc -->|8. Penugasan & Push Notification| AppKurir[App Kurir]
 
     %% Pewarnaan agar mirip dengan diagram asli Anda
     style Pelanggan fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
@@ -45,6 +44,7 @@ graph TD
     style AppResto fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
     style AppKurir fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
     style Broker fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px
+
 
 
 tugas-02-perancangan-arsitektur/
