@@ -20,14 +20,12 @@ Tidak perlu software berbayar. Dua opsi:
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
 
 ## Diagram Arsitektur FoodGo
-
-```mermaid
 graph TD
     %% Client & Gateway
     Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
     %% Core SOA Services
-    subgraph Core_SOA ["Layanan Inti (SOA)"]
+    subgraph Core_SOA ["Layanan Inti (SOA - Sinkron)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
         OrderSvc -->|"Sinkron: validasi menu (timeout 3s, CB)"| RestoSvc["🍔 Service Katalog Resto"]
         OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
@@ -60,7 +58,6 @@ graph TD
 
     %% Real-time Tracking
     OrderSvc -.->|push SSE status| Client
-```
 
   
 tugas-02-perancangan-arsitektur/
