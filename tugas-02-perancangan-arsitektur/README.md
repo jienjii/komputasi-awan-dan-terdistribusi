@@ -21,12 +21,26 @@ Tidak perlu software berbayar. Dua opsi:
 
 ````markdown
 ```mermaid
-graph LR
-  Client[Pelanggan] -->|HTTP request pesan| OrderSvc[Service Pesanan]
-  OrderSvc -->|RPC sinkron| PaymentSvc[Service Pembayaran]
-  OrderSvc -->|publish event OrderCreated| Broker[(Message Broker)]
-  Broker -->|subscribe| NotifSvc[Service Notifikasi Kurir]
-  Broker -->|subscribe| RestoSvc[Service Katalog Resto]
+graph TD
+    Client[Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| Gateway[API Gateway]
+
+    Gateway -->|2. Route Request - Sinkron| OrderSvc[Modul Pesanan / Order Service]
+    
+    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[Modul Katalog Resto]
+    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaySvc[Modul Pembayaran]
+    
+    OrderSvc -->|5. Trigger Dispatch & Push Notif - Async HTTP/gRPC| CourierSvc[Modul Kurir & Notifikasi]
+
+    RestoSvc -->|6. Kirim Pesanan Masuk| RestoApp[App Resto]
+    CourierSvc -->|7. Penugasan & Push Notification| CourierApp[App Kurir]
+
+    classDef sync fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef async fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef gateway fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+    class Gateway gateway;
+    class OrderSvc,PaySvc,RestoSvc sync;
+    class CourierSvc async;
 ```
 ````
 
