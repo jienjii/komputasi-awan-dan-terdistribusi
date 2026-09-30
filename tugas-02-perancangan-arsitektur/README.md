@@ -21,37 +21,48 @@ Tidak perlu software berbayar. Dua opsi:
 
 ````markdown
 ```mermaid
-graph TD
-    Pelanggan[Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| APIGateway[API Gateway]
-    APIGateway -->|2. Permintaan Rute - Sinkron| OrderSvc[Modul Pesanan / Layanan Pemesanan]
 
-    %% Jalur Validasi & Bayar (Sinkron - SOA)
-    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[Modul Katalog Resto]
-    OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaymentSvc[Modul Pembayaran]
-
-    %% Jalur Notifikasi & Kurir (Asinkron - Pub/Sub)
-    OrderSvc -->|5. Publish Event: OrderPaid - Asinkron| Broker[(Message Broker)]
-    
-    %% Distribusi Event dari Broker ke Subscriber
-    Broker -->|6. Kirim Pesanan Masuk| AppResto[App Resto]
-    Broker -->|7. Trigger Dispatch & Push Notif| CourierSvc[Modul Kurir & Notifikasi]
-    CourierSvc -->|8. Penugasan & Push Notification| AppKurir[App Kurir]
-
-    %% Pewarnaan agar mirip dengan diagram asli Anda
-    style Pelanggan fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
-    style APIGateway fill:#e8f5e9,stroke:#81c784,stroke-width:2px
-    style OrderSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:2px
-    style RestoSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:1px
-    style PaymentSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:1px
-    style CourierSvc fill:#fff3e0,stroke:#ffb74d,stroke-width:1px
-    style AppResto fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
-    style AppKurir fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
-    style Broker fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
 ## Struktur Submission
+graph TD
 
+    Client[Pelanggan / Mobile App]
+
+    APIGW[API Gateway]
+
+    OrderSvc[Modul Pesanan / Order Service]
+    PaymentSvc[Modul Pembayaran]
+    RestoSvc[Modul Katalog Resto]
+    CourierSvc[Modul Kurir dan Notifikasi]
+
+    Broker[Message Broker]
+
+    RestoApp[App Resto]
+    CourierApp[App Kurir]
+
+    Client -->|1. HTTP REST Request - Sinkron| APIGW
+
+    APIGW -->|2. Route Request - Sinkron| OrderSvc
+
+    OrderSvc -->|3. Validasi Menu dan Harga - REST/gRPC Sinkron| RestoSvc
+
+    OrderSvc -->|4. Proses Pembayaran - REST/gRPC Sinkron| PaymentSvc
+
+    OrderSvc -->|5. Publish OrderCreated Event| Broker
+
+    PaymentSvc -->|6. Publish PaymentSuccess Event| Broker
+
+    Broker -->|7. Subscribe Event| RestoSvc
+
+    Broker -->|8. Subscribe Event| CourierSvc
+
+    RestoSvc -->|9. Kirim Pesanan Masuk| RestoApp
+
+    CourierSvc -->|10. Penugasan dan Push Notifikasi| CourierApp
+```
+Penjelasan Arsitektur
 ```
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
