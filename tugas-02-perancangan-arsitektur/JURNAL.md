@@ -1,6 +1,6 @@
 # Jurnal Proses — Tugas 2
 
-## [Tanggal]
+## [30 September 2026]
 - Opsi arsitektur yang dipertimbangkan: ...
 - Kenapa akhirnya pilih [SOA/Pub-Sub]: ...
 - Revisi diagram (versi 1 → versi 2, apa yang berubah dan kenapa): ...
@@ -11,4 +11,4 @@
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| ... | ... | ... | ... | ... |
+| 30/9/2026 | Gemini | "Berikan Outline dasar untuk High Availability dan Resilience pada sistem terdistribusi" | AI memberikan poin umum tentang Load Balancer, Auto Scaling, Timeout, dan Retry | Menulis poin-poin tersebut sebagai draf kasar awal, namun menyadari bahwa solusi ini masih terlalu umum dan berisiko over-engineering |
