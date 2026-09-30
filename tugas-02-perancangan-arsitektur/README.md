@@ -24,6 +24,7 @@ Tidak perlu software berbayar. Dua opsi:
 
 ```mermaid
 graph LR
+
     Client[Pelanggan]
     Gateway[API Gateway]
     OrderSvc[Service Pesanan]
