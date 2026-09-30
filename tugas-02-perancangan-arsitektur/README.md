@@ -21,48 +21,19 @@ Tidak perlu software berbayar. Dua opsi:
 
 ````markdown
 ```mermaid
-
+graph LR
+  Client[Pelanggan] -->|HTTP request pesan| OrderSvc[Service Pesanan]
+  OrderSvc -->|RPC sinkron| PaymentSvc[Service Pembayaran]
+  OrderSvc -->|publish event OrderCreated| Broker[(Message Broker)]
+  Broker -->|subscribe| NotifSvc[Service Notifikasi Kurir]
+  Broker -->|subscribe| RestoSvc[Service Katalog Resto]
+```
+````
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
 ## Struktur Submission
-graph TD
 
-    Client[Pelanggan / Mobile App]
-
-    APIGW[API Gateway]
-
-    OrderSvc[Modul Pesanan / Order Service]
-    PaymentSvc[Modul Pembayaran]
-    RestoSvc[Modul Katalog Resto]
-    CourierSvc[Modul Kurir dan Notifikasi]
-
-    Broker[Message Broker]
-
-    RestoApp[App Resto]
-    CourierApp[App Kurir]
-
-    Client -->|1. HTTP REST Request - Sinkron| APIGW
-
-    APIGW -->|2. Route Request - Sinkron| OrderSvc
-
-    OrderSvc -->|3. Validasi Menu dan Harga - REST/gRPC Sinkron| RestoSvc
-
-    OrderSvc -->|4. Proses Pembayaran - REST/gRPC Sinkron| PaymentSvc
-
-    OrderSvc -->|5. Publish OrderCreated Event| Broker
-
-    PaymentSvc -->|6. Publish PaymentSuccess Event| Broker
-
-    Broker -->|7. Subscribe Event| RestoSvc
-
-    Broker -->|8. Subscribe Event| CourierSvc
-
-    RestoSvc -->|9. Kirim Pesanan Masuk| RestoApp
-
-    CourierSvc -->|10. Penugasan dan Push Notifikasi| CourierApp
-```
-Penjelasan Arsitektur
 ```
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
