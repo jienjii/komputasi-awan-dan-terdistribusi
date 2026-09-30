@@ -20,26 +20,33 @@ Tidak perlu software berbayar. Dua opsi:
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
 
 graph TD
-    %% Aktor & Gateway
     Pelanggan[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| APIGateway[🌐 API Gateway]
     APIGateway -->|2. Route Request - Sinkron| OrderSvc[📦 Modul Pesanan / Order Service]
 
-    %% Komunikasi Sinkron (SOA / Request-Response)
-    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[🍳 Modul Katalog Resto]
+    %% Jalur Validasi & Bayar (Sinkron - SOA)
+    OrderSvc -->|3. Validasi Menu & Harga - REST/gRPC Sinkron| RestoSvc[📖 Modul Katalog Resto]
     OrderSvc -->|4. Proses Otorisasi Bayar - REST/gRPC Sinkron| PaymentSvc[💳 Modul Pembayaran]
 
-    %% Komunikasi Asinkron (Publish-Subscribe) - SOLUSI UNTUK MEMUTUS KOPLING
-    OrderSvc -->|5. Publish Event: OrderPaid| Broker[(📥 Message Broker / Kafka or RabbitMQ)]
-
-    %% Broker meneruskan ke Subscriber secara mandiri
+    %% Jalur Notifikasi & Kurir (Asinkron - Pub/Sub) -> Solusi agar tidak saling mengganggu
+    OrderSvc -->|5. Publish Event: OrderPaid - Asinkron| Broker[(📥 Message Broker)]
+    
+    %% Distribusi Event dari Broker ke Subscriber
     Broker -->|6. Kirim Pesanan Masuk| AppResto[🏪 App Resto]
-    Broker -->|7. Penugasan & Push Notification| CourierSvc[🛵 Modul Kurir & Notifikasi]
-    CourierSvc -->|8. Terima Order| AppKurir[📱 App Kurir]
+    Broker -->|7. Trigger Dispatch & Push Notif| CourierSvc[🔔 Modul Kurir & Notifikasi]
+    CourierSvc -->|8. Penugasan & Push Notification| AppKurir[🛵 App Kurir]
 
-    %% Gaya Visualisasi
-    style APIGateway fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style Broker fill:#eceff1,stroke:#455a64,stroke-width:2px
-    style OrderSvc fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    %% Pewarnaan agar mirip dengan diagram asli Anda
+    style Pelanggan fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
+    style APIGateway fill:#e8f5e9,stroke:#81c784,stroke-width:2px
+    style OrderSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:2px
+    style RestoSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:1px
+    style PaymentSvc fill:#e3f2fd,stroke:#42a5f5,stroke-width:1px
+    style CourierSvc fill:#fff3e0,stroke:#ffb74d,stroke-width:1px
+    style AppResto fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
+    style AppKurir fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
+    style Broker fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px
+
+
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
 ├── JURNAL.md
