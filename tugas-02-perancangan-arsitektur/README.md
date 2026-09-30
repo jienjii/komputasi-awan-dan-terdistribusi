@@ -20,6 +20,8 @@ Tidak perlu software berbayar. Dua opsi:
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
 
 ````markdown
+## Diagram Arsitektur FoodGo
+
 ```mermaid
 graph LR
     Client[Pelanggan]
