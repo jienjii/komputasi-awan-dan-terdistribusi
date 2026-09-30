@@ -18,6 +18,9 @@ Melanjutkan Tugas 1: FoodGo butuh sistem yang **decoupled** agar tim kurir dan t
 Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
+
+````markdown
+```mermaid
 graph TD
     Pelanggan[Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| APIGateway[API Gateway]
     APIGateway -->|2. Permintaan Rute - Sinkron| OrderSvc[Modul Pesanan / Layanan Pemesanan]
@@ -45,8 +48,11 @@ graph TD
     style AppKurir fill:#e6dbfa,stroke:#b39ddb,stroke-width:1px
     style Broker fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px
 
+**Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
+## Struktur Submission
 
+```
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
 ├── JURNAL.md
@@ -67,4 +73,3 @@ tugas-02-perancangan-arsitektur/
 Kebijakan **Level 2 (AI Assisted Idea Generation & Structuring)** berlaku — lihat [`../RUBRIK-UMUM.md`](../RUBRIK-UMUM.md). Boleh memakai AI untuk brainstorming komponen apa saja yang umum ada di gaya arsitektur SOA/Pub-Sub; **tidak boleh** meminta AI menggambar diagram final atau menuliskan analisis trade-off yang tinggal ditempel. Catat pemakaian AI di "Log Penggunaan AI" pada `JURNAL.md`.
 
 - Diagram Mermaid/draw.io yang "terlalu generik" (identik dengan contoh tutorial di internet tanpa penyesuaian ke kasus FoodGo) akan dinilai rendah pada komponen kelengkapan & kejelasan diagram.
-
