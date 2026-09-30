@@ -22,38 +22,37 @@ Tidak perlu software berbayar. Dua opsi:
 ## Diagram Arsitektur FoodGo
 ```mermaid
 graph TD
+    %% Client & Gateway
     Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
-    subgraph Core_SOA ["Layanan Inti (SOA)"]
+    %% Core SOA Services
+    subgraph Core_SOA ["Layanan Inti (SOA - Sinkron)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
-        OrderSvc -->|"Sinkron: validasi menu (timeout 3s, CB)"| RestoSvc["🍔 Service Katalog Resto"]
-        OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
+        OrderSvc -->|"Sinkron: validasi menu (timeout 3s)"| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|"Sinkron: proses bayar (timeout 3s)"| PaymentSvc["💳 Service Pembayaran"]
     end
 
-    OrderSvc --- DB_Order[("Database Pesanan")]
-    PaymentSvc --- DB_Pay[("Database Pembayaran")]
-    RestoSvc --- DB_Resto[("Database Katalog")]
-
+    %% Message Broker
     Broker[("📥 Message Broker\n(RabbitMQ / Kafka)")]
 
-    subgraph Async_Services ["Layanan Pendukung (Pub-Sub)"]
+    %% Service Async / Support
+    subgraph Async_Services ["Layanan Pendukung (Pub-Sub - Asinkron)"]
         CourierSvc["🛵 Service Kurir & Notifikasi"]
     end
-    CourierSvc --- DB_Courier[("Database Kurir")]
 
-    OrderSvc -.->|publish PesananDibayar| Broker
-    Broker -.->|subscribe PesananDibayar| RestoSvc
+    %% Asynchronous Event Streams via Pub-Sub
+    OrderSvc -.->|publish: PesananDibayar| Broker
+    Broker -.->|subscribe: PesananDibayar| RestoSvc
 
-    RestoSvc -.->|"publish PesananDiterima / Ditolak"| Broker
-    Broker -.->|subscribe PesananDiterimaResto| CourierSvc
+    RestoSvc -.->|"publish: PesananDiterima / Ditolak"| Broker
+    Broker -.->|subscribe: PesananDiterimaResto| CourierSvc
     
-    CourierSvc -.->|publish KurirDitugaskan| Broker
-    Broker -.->|subscribe KurirDitugaskan / PesananDitolak| OrderSvc
-    Broker -.->|"subscribe PesananDitolak (Refund)"| PaymentSvc
+    CourierSvc -.->|publish: KurirDitugaskan| Broker
+    Broker -.->|subscribe: KurirDitugaskan| OrderSvc
 
-    OrderSvc -.->|push SSE status| Client
+    %% Real-time Status Update to Client
+    OrderSvc -.->|push: SSE status update| Client
 ```
-
 ---
   
 tugas-02-perancangan-arsitektur/
