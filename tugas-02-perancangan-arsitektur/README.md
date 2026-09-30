@@ -21,19 +21,20 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
+```mermaid
 graph TB
-    %% Client & Gateway
-    Client[📱 Pelanggan / App Mobile] -->|1. HTTP / REST API| Gateway[🌐 API Gateway]
+    %% Klien & Gateway
+    Client["📱 Pelanggan / Aplikasi Seluler"] -->|1. HTTP / REST API| Gateway["🌐 API Gateway"]
 
     %% Synchronous Services (SOA/Microservices)
     subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
         Gateway -->|2. Route Request| OrderSvc["📦 Service Pesanan"]
-        OrderSvc -->|3. Validasi Menu & Harga (HTTP/gRPC)| RestoSvc["🍔 Service Katalog Resto"]
-        OrderSvc -->|4. Proses Bayar (HTTP/gRPC)| PaymentSvc["💳 Service Pembayaran"]
+        OrderSvc -->|3. Validasi Menu & Harga| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|4. Proses Bayar| PaymentSvc["💳 Service Pembayaran"]
     end
 
     %% Event Broker
-    Broker[("📩 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
+    Broker[("📥 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
 
     %% Asynchronous Processing (Pub-Sub)
     OrderSvc -.->|5. Publish Event: OrderPaid| Broker
@@ -44,10 +45,11 @@ graph TB
     end
 
     %% Database Isolation
-    OrderSvc --- DB_Order[(Database Pesanan)]
-    PaymentSvc --- DB_Pay[(Database Pembayaran)]
-    RestoSvc --- DB_Resto[(Database Katalog)]
-    CourierSvc --- DB_Courier[(Database Kurir)]
+    OrderSvc --- DB_Order[("Database Pesanan")]
+    PaymentSvc --- DB_Pay[("Database Pembayaran")]
+    RestoSvc --- DB_Resto[("Database Katalog")]
+    CourierSvc --- DB_Courier[("Database Kurir")]
+```
 
 ## Struktur Submission
 
