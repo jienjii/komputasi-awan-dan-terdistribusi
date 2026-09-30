@@ -22,8 +22,7 @@ Tidak perlu software berbayar. Dua opsi:
 ````markdown
 ```mermaid
 graph TD
-   ```mermaid
-graph TD
+
     %% Client & Gateway Entry
     Client[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| Gateway[🚪 API Gateway]
 
