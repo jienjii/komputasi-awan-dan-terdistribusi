@@ -19,31 +19,18 @@ Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
 
-````markdown
 ## Diagram Arsitektur FoodGo
+
 ```mermaid
-graph LR
-    Client[Pelanggan]
-    Gateway[API Gateway]
-    OrderSvc[Service Pesanan]
-    PaymentSvc[Service Pembayaran]
-    CourierSvc[Service Kurir / Notifikasi]
-    CatalogSvc[Service Katalog Resto]
-
-    Client -->|HTTP Request| Gateway
-
-    Gateway -->|Request Pesanan| OrderSvc
-    Gateway -->|Request Katalog| CatalogSvc
-
-    OrderSvc -->|Request Pembayaran| PaymentSvc
-    PaymentSvc -->|Status Pembayaran| OrderSvc
-
-    OrderSvc -->|Request Penugasan Kurir| CourierSvc
-    CourierSvc -->|Status Kurir| OrderSvc
-
-    CatalogSvc -->|Data Restoran dan Menu| Gateway
-```
-````
+flowchart LR
+    A[Pelanggan] -->|HTTP Request| B[API Gateway]
+    B -->|Request Pesanan| C[Service Pesanan]
+    B -->|Request Katalog| F[Service Katalog Resto]
+    C -->|Request Pembayaran| D[Service Pembayaran]
+    D -->|Status Pembayaran| C
+    C -->|Request Penugasan Kurir| E[Service Kurir dan Notifikasi]
+    E -->|Status Kurir| C
+    F -->|Data Restoran dan Menu| B
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
