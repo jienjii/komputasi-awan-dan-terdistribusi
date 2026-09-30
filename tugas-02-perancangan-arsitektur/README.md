@@ -21,13 +21,12 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
-```mermaid
 graph TD
     %% Client & Gateway
     Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
     %% Core SOA Services
-    subgraph Core_SOA ["Layanan Inti (SOA)"]
+    subgraph Core_SOA ["Layanan Inti (SOA - Sinkron)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
         OrderSvc -->|"Sinkron: validasi menu (timeout 3s, CB)"| RestoSvc["🍔 Service Katalog Resto"]
         OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
@@ -38,11 +37,13 @@ graph TD
     PaymentSvc --- DB_Pay[("Database Pembayaran")]
     RestoSvc --- DB_Resto[("Database Katalog")]
 
-    %% Event Broker
+    %% Message Broker
     Broker[("📥 Message Broker\n(RabbitMQ / Kafka)")]
 
-    %% Service Async
-    CourierSvc["🛵 Service Kurir & Notifikasi"]
+    %% Service Async / Support
+    subgraph Async_Services ["Layanan Pendukung (Pub-Sub - Asinkron)"]
+        CourierSvc["🛵 Service Kurir & Notifikasi"]
+    end
     CourierSvc --- DB_Courier[("Database Kurir")]
 
     %% Asynchronous Event Streams
@@ -58,12 +59,6 @@ graph TD
 
     %% Real-time Tracking
     OrderSvc -.->|push SSE status| Client
-```
-
-**Legenda Diagram:**
-* **Garis Solid (`-->`):** Komunikasi Sinkron (Request-Response / Direct Call).
-* **Garis Putus-Putus (`-.->`):** Komunikasi Asinkron (Event-Driven via Message Broker / SSE).
-* *Batas Arsitektur:* Layanan Inti menggunakan komunikasi SOA/REST untuk transaksi real-time, sedangkan koordinasi antar-modul resto, kurir, dan pesanan berbasis Publish-Subscribe secara asinkron.
   
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
