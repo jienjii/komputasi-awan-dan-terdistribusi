@@ -19,6 +19,7 @@ Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
 
+```mermaid
 graph TD
     %% Client & Gateway Entry
     Client[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| Gateway[🚪 API Gateway]
@@ -45,6 +46,7 @@ graph TD
     class Gateway gateway;
     class OrderSvc,PaySvc,RestoSvc sync;
     class CourierSvc async;
+```
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
