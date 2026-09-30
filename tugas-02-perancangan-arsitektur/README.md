@@ -22,35 +22,26 @@ Tidak perlu software berbayar. Dua opsi:
 ````markdown
 ```mermaid
 graph LR
-
     Client[Pelanggan]
-
     Gateway[API Gateway]
-
     OrderSvc[Service Pesanan]
-
     PaymentSvc[Service Pembayaran]
-
     CourierSvc[Service Kurir / Notifikasi]
-
     CatalogSvc[Service Katalog Resto]
-
 
     Client -->|HTTP Request| Gateway
 
     Gateway -->|Request Pesanan| OrderSvc
-
     Gateway -->|Request Katalog| CatalogSvc
 
     OrderSvc -->|Request Pembayaran| PaymentSvc
-
     PaymentSvc -->|Status Pembayaran| OrderSvc
 
     OrderSvc -->|Request Penugasan Kurir| CourierSvc
-
     CourierSvc -->|Status Kurir| OrderSvc
 
-    CatalogSvc -->|Data Restoran & Menu| Gateway
+    CatalogSvc -->|Data Restoran dan Menu| Gateway
+```
 ````
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
