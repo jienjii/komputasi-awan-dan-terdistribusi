@@ -12,3 +12,4 @@
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
 | 30/9/2026 | Gemini | "Berikan Outline dasar untuk High Availability dan Resilience pada sistem terdistribusi" | AI memberikan poin umum tentang Load Balancer, Auto Scaling, Timeout, dan Retry | Menulis poin-poin tersebut sebagai draf kasar awal, namun menyadari bahwa solusi ini masih terlalu umum dan berisiko over-engineering |
+| 30/9/2026 | Gemini | "Bagaimana mencegah retry storm pada kegagalan komunikasi inter-service dan bagaimana konfigurasi threshold Circuit Breaker yg pas?" | AI menyarankan penggunaan Exponential Backoff dengan Jitter acak serta pemutusan sirkuit berbasis rasio failure rate (>50%) | Mengintegrasikan konsep Jitter ke dalam draf retry dan menyusun aturan Circuit Breaker yang spesifik untuk Payment Service FoodGo |
