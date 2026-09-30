@@ -43,24 +43,21 @@ Tambahin caching di sisi client/edge buat status yang nggak berubah-ubah cepat
 
 ---
 
-## Pitfall 3: [Jaringan Aman] — ditulis oleh [Sefia Nuraini]
+## Bagian 3: [High Availability & Fault Tolerance] — ditulis oleh [Angeli Thie]
 
-**Bukti di skenario:** Komunikasi antar-modul di FoodGo (pesanan, pembayaran, notifikasi) dilakukan lewat HTTP biasa tanpa enkripsi, dan tidak ada mekanisme autentikasi/otorisasi antar-service—modul pembayaran menerima begitu saja request yang "mengaku" datang dari modul pesanan tanpa validasi lebih lanjut.
+### 1. Perancangan Load Balancer & Horizontal Scaling 
+* **Load Balancer:** Menggunakan Load Balancer di depan Order Service dan Payment Service
+* **Auto Scaling:** Menerapkan Auto-scaling berbasis pemakaian CPU server
 
-**Kenapa ini keliru:** Asumsi bahwa jaringan internal itu otomatis aman adalah kekeliruan klasik, apalagi di era arsitektur terdistribusi/cloud di mana traffic bisa melewati banyak segmen jaringan, container, bahkan region berbeda. Tanpa enkripsi (TLS) dan autentikasi antar-service (misalnya mTLS atau API key/token), siapa pun yang berhasil menyusup ke jaringan internal bisa menyadap data sensitif atau bahkan menyamar sebagai service lain untuk mengirim request palsu.
+### 2. Pattern Fault Tolerance
+* **Timeout:** Menambahkan timeout 3 detik untuk panggilan antar service
+* **Retry:** Menerapkan retry otomatis saat terjadi error jaringan
 
-**Dampak ke FoodGo:** Data sensitif seperti informasi pembayaran, nomor kartu, atau data pribadi user bisa disadap (man-in-the-middle) kalau ada pihak tidak sah yang berhasil masuk ke jaringan internal. Selain itu, tanpa autentikasi antar-service, ada risiko pihak eksternal mengirim request palsu langsung ke modul pembayaran untuk membuat transaksi ilegal atau memanipulasi status pesanan tanpa melalui modul pesanan yang sah.
+## Bagian 4: [Keamanan Inter-Service & Zero Trust] - ditulis oleh [Angeli Thie]
 
-**Solusi desain awal:** Menerapkan enkripsi pada seluruh jalur komunikasi antar-layanan menggunakan mTLS (Mutual TLS) atau HTTPS untuk menjamin enkripsi data secara end-to-end. Selain itu, setiap layanan seperti modul pembayaran wajib memvalidasi identitas pengirim request menggunakan autentikasi token (seperti JWT atau API Key) sebelum memproses transaksi, serta membatasi akses antar-modul melalui konfigurasi Firewall internal atau Network Security Groups berbasis prinsip Zero Trust
-
-**Trade-off:** Solusi ini meningkatkan kompleksitas operasional dan beban komputasi (CPU overhead) akibat enkripsi serta pemrosesan TLS handshake pada setiap request antar-service. Selain itu, manajemen sertifikat dan token membutuhkan otomatisasi yang tepercaya, karena kesalahan konfigurasi atau sertifikat yang kedaluwarsa dapat menyebabkan komunikasi antar-layanan terputus total secara mendadak
+### 1. Enkripsi Transport
+* Menggunakan HTTPS untuk komunikasi antar service
 
 ---
 
 ## Kesimpulan Kelompok
-Untuk memperbaiki ketiga pitfall utama di atas (*unreliable network*, asumsi *zero latency/infinite bandwidth*, dan *unsecure network*), FoodGo disarankan untuk beralih dari arsitektur monolitik yang saling *blocking* menuju arsitektur terdistribusi yang berbasis *resilient design* dan *event-driven*
-
-Secara garis besar, arsitektur yang disarankan meliputi:
-1. Menerapkan *timeout*, *circuit breaker*, serta komunikasi *push-based/asynchronous* (misal: WebSocket / Message Broker) untuk mencegah kemacetan *resource* server saat trafik memuncak
-2. Mengamankan seluruh komunikasi antar-layanan menggunakan enkripsi (mTLS/HTTPS) serta mekanisme otentikasi token (misal: JWT / API key) untuk memastikan *zero-trust network*
-3. Perubahan ini menjadi dasar yang kuat untuk melangkah ke Tugas 2, yaitu perancangan arsitektur microservices/terdistribusi yang dapat di-*scale* secara individual dan tahan terhadap kegagalan parsial (*fault-tolerant*)
