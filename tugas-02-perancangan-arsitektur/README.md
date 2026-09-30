@@ -33,7 +33,7 @@ graph TD
         OrderSvc -->|"Sinkron: proses bayar (timeout 3s, CB)"| PaymentSvc["💳 Service Pembayaran"]
     end
 
-    %% Database Isolation (Tepat di dekat service masing-masing)
+    %% Database Isolation
     OrderSvc --- DB_Order[("Database Pesanan")]
     PaymentSvc --- DB_Pay[("Database Pembayaran")]
     RestoSvc --- DB_Resto[("Database Katalog")]
@@ -45,16 +45,16 @@ graph TD
     CourierSvc["🛵 Service Kurir & Notifikasi"]
     CourierSvc --- DB_Courier[("Database Kurir")]
 
-    %% Asynchronous Event Streams (Label Diperpendek)
+    %% Asynchronous Event Streams
     OrderSvc -.->|publish PesananDibayar| Broker
     Broker -.->|subscribe PesananDibayar| RestoSvc
 
-    RestoSvc -.->|publish PesananDiterima / Ditolak| Broker
+    RestoSvc -.->|"publish PesananDiterima / Ditolak"| Broker
     Broker -.->|subscribe PesananDiterimaResto| CourierSvc
     
     CourierSvc -.->|publish KurirDitugaskan| Broker
     Broker -.->|subscribe KurirDitugaskan / PesananDitolak| OrderSvc
-    Broker -.->|subscribe PesananDitolak (Refund)| PaymentSvc
+    Broker -.->|"subscribe PesananDitolak (Refund)"| PaymentSvc
 
     %% Real-time Tracking
     OrderSvc -.->|push SSE status| Client
@@ -64,6 +64,7 @@ graph TD
 * **Garis Solid (`-->`):** Komunikasi Sinkron (Request-Response / Direct Call).
 * **Garis Putus-Putus (`-.->`):** Komunikasi Asinkron (Event-Driven via Message Broker / SSE).
 * *Batas Arsitektur:* Layanan Inti menggunakan komunikasi SOA/REST untuk transaksi real-time, sedangkan koordinasi antar-modul resto, kurir, dan pesanan berbasis Publish-Subscribe secara asinkron.
+  
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
 ├── JURNAL.md
