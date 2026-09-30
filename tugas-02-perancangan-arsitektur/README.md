@@ -22,7 +22,6 @@ Tidak perlu software berbayar. Dua opsi:
 ````markdown
 ```mermaid
 graph TD
-
     %% Client & Gateway Entry
     Client[📱 Pelanggan / Mobile App] -->|1. HTTP REST Request - Sinkron| Gateway[🚪 API Gateway]
 
@@ -49,7 +48,6 @@ graph TD
     class OrderSvc,PaySvc,RestoSvc sync;
     class CourierSvc async;
 ```
-
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
 ## Struktur Submission
