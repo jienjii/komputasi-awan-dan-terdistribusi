@@ -29,12 +29,12 @@ graph TB
     %% Core Services (SOA)
     subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
-        OrderSvc -->|Sinkron: validasi menu (timeout 3 dtk, circuit breaker)| RestoSvc["🍔 Service Katalog Resto"]
-        OrderSvc -->|Sinkron: proses bayar (timeout 3 dtk, circuit breaker)| PaymentSvc["💳 Service Pembayaran"]
+        OrderSvc -->|"Sinkron: validasi menu - timeout 3s & CB"| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|"Sinkron: proses bayar - timeout 3s & CB"| PaymentSvc["💳 Service Pembayaran"]
     end
 
     %% Event Broker
-    Broker[("📥 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
+    Broker[("📥 Message Broker / Event Bus - RabbitMQ / Kafka")]
 
     %% Asynchronous Processing (Pub-Sub)
     OrderSvc -.->|Asinkron: publish PesananDibayar| Broker
