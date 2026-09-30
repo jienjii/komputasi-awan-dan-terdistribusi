@@ -22,56 +22,48 @@ Tidak perlu software berbayar. Dua opsi:
 ## Diagram Arsitektur FoodGo
 
 ```mermaid
-graph TB
+graph LR
     %% Client & Gateway
-    Client["📱 Pelanggan / Aplikasi Seluler"] -->|Sinkron: HTTP / REST API| Gateway["🌐 API Gateway"]
+    Client["📱 Pelanggan"] -->|Sinkron: HTTP API| Gateway["🌐 API Gateway"]
 
     %% Core Services (SOA)
-    subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
+    subgraph Core_SOA ["Layanan Inti (SOA)"]
         Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
-        OrderSvc -->|"Sinkron: validasi menu - timeout 3s & CB"| RestoSvc["🍔 Service Katalog Resto"]
-        OrderSvc -->|"Sinkron: proses bayar - timeout 3s & CB"| PaymentSvc["💳 Service Pembayaran"]
+        OrderSvc -->|"Sinkron: validasi menu (timeout 3s & CB)"| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|"Sinkron: proses bayar (timeout 3s & CB)"| PaymentSvc["💳 Service Pembayaran"]
     end
 
+    %% Database Isolation (Diletakkan di bawah service masing-masing)
+    OrderSvc --- DB_Order[("Database Pesanan")]
+    PaymentSvc --- DB_Pay[("Database Pembayaran")]
+    RestoSvc --- DB_Resto[("Database Katalog")]
+
     %% Event Broker
-    Broker[("📥 Message Broker / Event Bus - RabbitMQ / Kafka")]
+    Broker[("📥 Message Broker\n(RabbitMQ / Kafka)")]
 
     %% Asynchronous Processing (Pub-Sub)
     OrderSvc -.->|Asinkron: publish PesananDibayar| Broker
     Broker -.->|Asinkron: subscribe PesananDibayar| RestoSvc
 
-    subgraph Async_Services ["Layanan Pendukung (Pub-Sub - Asinkron)"]
-        CourierSvc["🛵 Service Kurir & Notifikasi"]
-    end
+    %% Service Kurir
+    CourierSvc["🛵 Service Kurir & Notifikasi"]
+    CourierSvc --- DB_Courier[("Database Kurir")]
 
-    %% Jalur Sukses Resto & Kurir
-    RestoSvc -.->|Asinkron: publish PesananDiterimaResto| Broker
+    %% Jalur Events Resto & Kurir (Label digabung agar rapi)
+    RestoSvc -.->|Asinkron: publish PesananDiterima / Ditolak| Broker
     Broker -.->|Asinkron: subscribe PesananDiterimaResto| CourierSvc
+    
     CourierSvc -.->|Asinkron: publish KurirDitugaskan| Broker
-    Broker -.->|Asinkron: subscribe KurirDitugaskan| OrderSvc
-
-    %% Jalur Gagal Resto & Refund
-    RestoSvc -.->|Asinkron: publish PesananDitolakResto| Broker
-    Broker -.->|Asinkron: subscribe PesananDitolakResto| OrderSvc
-    Broker -.->|Asinkron: subscribe PesananDitolakResto - Trigger Refund| PaymentSvc
+    Broker -.->|Asinkron: subscribe KurirDitugaskan / PesananDitolak| OrderSvc
+    Broker -.->|Asinkron: subscribe PesananDitolak - Refund| PaymentSvc
 
     %% Real-time Tracking
     OrderSvc -.->|Asinkron: push SSE status| Client
-
-    %% Database Isolation
-    OrderSvc --- DB_Order[("Database Pesanan")]
-    PaymentSvc --- DB_Pay[("Database Pembayaran")]
-    RestoSvc --- DB_Resto[("Database Katalog")]
-    CourierSvc --- DB_Courier[("Database Kurir")]
 ```
 
 **Legenda Diagram:**
 * **Garis Solid (`-->`):** Komunikasi Sinkron (Request-Response / Direct Call).
 * **Garis Putus-Putus (`-.->`):** Komunikasi Asinkron (Event-Driven via Message Broker / SSE).
-
-## Struktur Submission
-
-```
 tugas-02-perancangan-arsitektur/
 ├── README.md          # Analisis + diagram Mermaid (jika Opsi A) atau referensi ke diagram/
 ├── JURNAL.md
