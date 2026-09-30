@@ -21,35 +21,41 @@ Tidak perlu software berbayar. Dua opsi:
 
 ## Diagram Arsitektur FoodGo
 
-```mermaid
 graph TB
-    %% Klien & Gateway
-    Client["📱 Pelanggan / Aplikasi Seluler"] -->|1. HTTP / REST API| Gateway["🌐 API Gateway"]
+    %% Client & Gateway
+    Client["📱 Pelanggan (App Mobile)"] -->|Sinkron: HTTP/REST| Gateway["🌐 API Gateway"]
 
-    %% Synchronous Services (SOA/Microservices)
+    %% Core Services (SOA)
     subgraph Core_SOA_Services ["Layanan Inti (SOA - Sinkron)"]
-        Gateway -->|2. Route Request| OrderSvc["📦 Service Pesanan"]
-        OrderSvc -->|3. Validasi Menu & Harga| RestoSvc["🍔 Service Katalog Resto"]
-        OrderSvc -->|4. Proses Bayar| PaymentSvc["💳 Service Pembayaran"]
+        Gateway -->|Sinkron: route request| OrderSvc["📦 Service Pesanan"]
+        OrderSvc -->|Sinkron: validasi menu (timeout 3 dtk, circuit breaker)| RestoSvc["🍔 Service Katalog Resto"]
+        OrderSvc -->|Sinkron: proses bayar (timeout 3 dtk, circuit breaker)| PaymentSvc["💳 Service Pembayaran"]
     end
 
     %% Event Broker
-    Broker[("📥 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
+    Broker[("📩 Message Broker / Event Bus\n(RabbitMQ / Kafka)")]
 
     %% Asynchronous Processing (Pub-Sub)
-    OrderSvc -.->|5. Publish Event: OrderPaid| Broker
+    OrderSvc -.->|Asinkron: publish PesananDibayar| Broker
+    Broker -.->|Asinkron: subscribe PesananDibayar| RestoSvc
 
-    subgraph Event_Subscribers ["Layanan Pendukung (Pub-Sub - Asinkron)"]
-        Broker -.->|6a. Subscribe Event| RestoNotifSvc["👨‍🍳 Service Modul Resto"]
-        Broker -.->|6b. Subscribe Event| CourierSvc["🛵 Service Kurir & Notifikasi"]
+    subgraph Async_Services ["Layanan Pendukung (Pub-Sub - Asinkron)"]
+        CourierSvc["🛵 Service Kurir & Notifikasi"]
     end
+
+    RestoSvc -.->|Asinkron: publish PesananDiterimaResto| Broker
+    Broker -.->|Asinkron: subscribe PesananDiterimaResto| CourierSvc
+    CourierSvc -.->|Asinkron: publish KurirDitugaskan| Broker
+    Broker -.->|Asinkron: subscribe Event Update Status| OrderSvc
+
+    %% Real-time Tracking
+    OrderSvc -.->|Asinkron: push SSE status| Client
 
     %% Database Isolation
     OrderSvc --- DB_Order[("Database Pesanan")]
     PaymentSvc --- DB_Pay[("Database Pembayaran")]
     RestoSvc --- DB_Resto[("Database Katalog")]
     CourierSvc --- DB_Courier[("Database Kurir")]
-```
 
 ## Struktur Submission
 
