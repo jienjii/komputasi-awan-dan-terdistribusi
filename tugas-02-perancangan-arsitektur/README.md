@@ -21,10 +21,8 @@ Tidak perlu software berbayar. Dua opsi:
 
 ````markdown
 ## Diagram Arsitektur FoodGo
-
 ```mermaid
 graph LR
-
     Client[Pelanggan]
     Gateway[API Gateway]
     OrderSvc[Service Pesanan]
