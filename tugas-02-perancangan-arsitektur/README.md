@@ -44,10 +44,16 @@ graph TB
         CourierSvc["🛵 Service Kurir & Notifikasi"]
     end
 
+    %% Jalur Sukses Resto & Kurir
     RestoSvc -.->|Asinkron: publish PesananDiterimaResto| Broker
     Broker -.->|Asinkron: subscribe PesananDiterimaResto| CourierSvc
     CourierSvc -.->|Asinkron: publish KurirDitugaskan| Broker
-    Broker -.->|Asinkron: subscribe Event Update Status| OrderSvc
+    Broker -.->|Asinkron: subscribe KurirDitugaskan| OrderSvc
+
+    %% Jalur Gagal Resto & Refund
+    RestoSvc -.->|Asinkron: publish PesananDitolakResto| Broker
+    Broker -.->|Asinkron: subscribe PesananDitolakResto| OrderSvc
+    Broker -.->|Asinkron: subscribe PesananDitolakResto - Trigger Refund| PaymentSvc
 
     %% Real-time Tracking
     OrderSvc -.->|Asinkron: push SSE status| Client
@@ -58,6 +64,10 @@ graph TB
     RestoSvc --- DB_Resto[("Database Katalog")]
     CourierSvc --- DB_Courier[("Database Kurir")]
 ```
+
+**Legenda Diagram:**
+* **Garis Solid (`-->`):** Komunikasi Sinkron (Request-Response / Direct Call).
+* **Garis Putus-Putus (`-.->`):** Komunikasi Asinkron (Event-Driven via Message Broker / SSE).
 
 ## Struktur Submission
 
