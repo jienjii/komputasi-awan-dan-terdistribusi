@@ -18,17 +18,30 @@ Melanjutkan Tugas 1: FoodGo butuh sistem yang **decoupled** agar tim kurir dan t
 Tidak perlu software berbayar. Dua opsi:
 
 **Opsi A — Mermaid di dalam Markdown (disarankan).** Ditulis sebagai teks biasa di `README.md`, otomatis dirender jadi diagram oleh GitHub — tidak perlu install apa pun.
-
-````markdown
 ```mermaid
 graph LR
-  Client[Pelanggan] -->|HTTP request pesan| OrderSvc[Service Pesanan]
-  OrderSvc -->|RPC sinkron| PaymentSvc[Service Pembayaran]
-  OrderSvc -->|publish event OrderCreated| Broker[(Message Broker)]
-  Broker -->|subscribe| NotifSvc[Service Notifikasi Kurir]
-  Broker -->|subscribe| RestoSvc[Service Katalog Resto]
+
+    Client[Pelanggan]
+    APIGW[API Gateway]
+
+    OrderSvc[Modul Pesanan]
+    PaymentSvc[Modul Pembayaran]
+    RestoSvc[Modul Katalog Resto]
+    NotifSvc[Modul Kurir dan Notifikasi]
+
+    Broker[(Message Broker)]
+
+    Client -->|HTTP Request| APIGW
+    APIGW -->|Buat Pesanan| OrderSvc
+
+    OrderSvc -->|Request Pembayaran (Sinkron)| PaymentSvc
+
+    OrderSvc -->|Publish OrderCreated| Broker
+    PaymentSvc -->|Publish PaymentSuccess| Broker
+
+    Broker -->|Subscribe Event| RestoSvc
+    Broker -->|Subscribe Event| NotifSvc
 ```
-````
 
 **Opsi B — draw.io / diagrams.net** (gratis, jalan di browser tanpa akun, atau app desktop offline di [app.diagrams.net](https://app.diagrams.net/)). Ekspor sebagai `.png` dan simpan di folder `diagram/`.
 
