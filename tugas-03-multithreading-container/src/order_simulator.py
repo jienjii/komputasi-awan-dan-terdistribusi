@@ -9,35 +9,30 @@ import threading
 import random
 import time
 
-NUM_ORDERS = 100        # jumlah pesanan simulasi yang masuk
-NUM_WORKERS = 10        # jumlah thread pekerja
+NUM_ORDERS = 100
+NUM_WORKERS = 10
 
-# Counter bersama untuk menghitung total pesanan yang berhasil diproses.
-# Sengaja rawan race condition jika diakses tanpa proteksi.
+# Counter bersama
 processed_count = 0
 
-# TODO 1: Buat objek Lock di sini untuk melindungi `processed_count`.
-# lock = threading.Lock()
+# Lock untuk melindungi counter
+lock = threading.Lock()
 
 
 def process_order(order_id: int) -> None:
-    """Proses satu pesanan. Dipanggil oleh tiap thread pekerja."""
+    """Proses satu pesanan."""
     global processed_count
 
-    # Simulasikan kerja nyata (mis. validasi, hitung total harga)
+    # Simulasi proses pesanan
     time.sleep(random.uniform(0.001, 0.01))
 
-    # TODO 2: Tambahkan increment `processed_count` DI SINI.
-    # Langkah 1: jalankan dulu tanpa lock (increment biasa: processed_count += 1)
-    #            dan buktikan hasil akhirnya sering salah (< NUM_ORDERS).
-    # Langkah 2: bungkus increment dengan `with lock:` dan buktikan hasilnya
-    #            selalu tepat NUM_ORDERS. Simpan bukti kedua kondisi ini
-    #            di JURNAL.md / folder bukti/.
-    pass
+    # Counter dilindungi oleh Lock
+    with lock:
+        processed_count += 1
 
 
 def worker(order_ids: list) -> None:
-    """Satu thread pekerja memproses sekumpulan order_id."""
+    """Thread pekerja memproses sekumpulan pesanan."""
     for order_id in order_ids:
         process_order(order_id)
 
@@ -45,18 +40,45 @@ def worker(order_ids: list) -> None:
 def main() -> None:
     order_ids = list(range(1, NUM_ORDERS + 1))
 
-    # TODO 3: Bagi `order_ids` menjadi NUM_WORKERS bagian, buat satu
-    # threading.Thread per bagian yang menjalankan `worker(...)`,
-    # start semua thread, lalu join semua thread sebelum lanjut.
+    # Membagi pesanan ke beberapa thread
+    chunk_size = len(order_ids) // NUM_WORKERS
+
     threads = []
-    # ... isi logika pembagian tugas & pembuatan thread di sini ...
 
-    for t in threads:
-        t.join()
+    for i in range(NUM_WORKERS):
+        start = i * chunk_size
 
-    print(f"Total pesanan diproses: {processed_count} (seharusnya {NUM_ORDERS})")
+        if i == NUM_WORKERS - 1:
+            end = len(order_ids)
+        else:
+            end = start + chunk_size
+
+        worker_orders = order_ids[start:end]
+
+        thread = threading.Thread(
+            target=worker,
+            args=(worker_orders,)
+        )
+
+        threads.append(thread)
+
+    # Menjalankan semua thread
+    for thread in threads:
+        thread.start()
+
+    # Menunggu semua thread selesai
+    for thread in threads:
+        thread.join()
+
+    print(
+        f"Total pesanan diproses: "
+        f"{processed_count} (seharusnya {NUM_ORDERS})"
+    )
+
     if processed_count != NUM_ORDERS:
-        print("RACE CONDITION TERDETEKSI - lengkapi TODO 1 & TODO 2 dengan Lock!")
+        print("RACE CONDITION TERDETEKSI!")
+    else:
+        print("Semua pesanan berhasil diproses dengan aman.")
 
 
 if __name__ == "__main__":
